@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,9 +20,7 @@ html, body {
     width: 100%;
     height: 100%;
     overflow: hidden;
-
     background: #080808;
-
     user-select: none;
     -webkit-user-select: none;
     touch-action: manipulation;
@@ -51,24 +50,16 @@ html, body {
     cursor: pointer;
 }
 
-/* Normal standby screen */
-
 #label {
     font-size: 18vw;
     font-weight: 700;
     letter-spacing: 0.02em;
 }
 
-
-/* CALLING state */
-
 #screen.calling {
     background: #160a0a;
     color: #c98b8b;
 }
-
-
-/* Caregiver reset button */
 
 #reset {
     display: none;
@@ -76,7 +67,6 @@ html, body {
     position: absolute;
     bottom: 5vh;
     left: 50%;
-
     transform: translateX(-50%);
 
     padding: 16px 34px;
@@ -89,12 +79,13 @@ html, body {
 
     font-size: 4vw;
     font-weight: 600;
+
+    touch-action: none;
 }
 
 #screen.calling #reset {
     display: block;
 }
-
 </style>
 </head>
 
@@ -119,14 +110,18 @@ const reset = document.getElementById("reset");
 let resetTimer = null;
 
 
-/* Dad activates CALL */
+/* =========================
+   DAD ACTIVATES CALL
+   ========================= */
 
 screen.addEventListener("click", function(event) {
 
+    /* Ignore clicks on the reset button */
     if (event.target === reset) {
         return;
     }
 
+    /* Ignore everything while already calling */
     if (screen.classList.contains("calling")) {
         return;
     }
@@ -139,20 +134,44 @@ screen.addEventListener("click", function(event) {
 });
 
 
-/* Caregiver holds RESET for 2 seconds */
+/* =========================
+   CAREGIVER RESET
+   ========================= */
 
-function startReset() {
+function beginReset(event) {
 
+    event.preventDefault();
+    event.stopPropagation();
+
+    /* Only allow reset while CALLING */
+    if (!screen.classList.contains("calling")) {
+        return;
+    }
+
+    /* Cancel any previous reset timer */
+    if (resetTimer !== null) {
+        clearTimeout(resetTimer);
+        resetTimer = null;
+    }
+
+    /* Must hold for 2 seconds */
     resetTimer = setTimeout(function() {
 
         screen.classList.remove("calling");
         label.textContent = "CALL";
 
+        resetTimer = null;
+
     }, 2000);
 }
 
 
-function cancelReset() {
+function cancelReset(event) {
+
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
 
     if (resetTimer !== null) {
         clearTimeout(resetTimer);
@@ -161,12 +180,28 @@ function cancelReset() {
 }
 
 
-reset.addEventListener("pointerdown", startReset);
+/* Trackpad / mouse */
+
+reset.addEventListener("mousedown", beginReset);
+reset.addEventListener("mouseup", cancelReset);
+reset.addEventListener("mouseleave", cancelReset);
+
+
+/* Touchscreen */
+
+reset.addEventListener("touchstart", beginReset, { passive: false });
+reset.addEventListener("touchend", cancelReset, { passive: false });
+reset.addEventListener("touchcancel", cancelReset, { passive: false });
+
+
+/* Pointer events as an additional fallback */
+
+reset.addEventListener("pointerdown", beginReset);
 reset.addEventListener("pointerup", cancelReset);
 reset.addEventListener("pointercancel", cancelReset);
-reset.addEventListener("pointerleave", cancelReset);
 
 </script>
 
 </body>
 </html>
+```
