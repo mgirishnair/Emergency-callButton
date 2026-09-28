@@ -21,6 +21,7 @@ html, body {
     height: 100%;
     overflow: hidden;
     background: #080808;
+
     user-select: none;
     -webkit-user-select: none;
     touch-action: manipulation;
@@ -56,10 +57,16 @@ html, body {
     letter-spacing: 0.02em;
 }
 
+
+/* CALLING screen */
+
 #screen.calling {
     background: #160a0a;
     color: #c98b8b;
 }
+
+
+/* Caregiver RESET button */
 
 #reset {
     display: none;
@@ -69,23 +76,24 @@ html, body {
     left: 50%;
     transform: translateX(-50%);
 
-    padding: 16px 34px;
+    padding: 18px 40px;
 
     border: 2px solid #765050;
     border-radius: 18px;
 
     background: #211010;
-    color: #b98f8f;
+    color: #c9a0a0;
 
     font-size: 4vw;
     font-weight: 600;
 
-    touch-action: none;
+    cursor: pointer;
 }
 
 #screen.calling #reset {
     display: block;
 }
+
 </style>
 </head>
 
@@ -96,18 +104,17 @@ html, body {
     <div id="label">CALL</div>
 
     <button id="reset" type="button">
-        HOLD TO RESET
+        RESET
     </button>
 
 </div>
+
 
 <script>
 
 const screen = document.getElementById("screen");
 const label = document.getElementById("label");
 const reset = document.getElementById("reset");
-
-let resetTimer = null;
 
 
 /* =========================
@@ -116,21 +123,27 @@ let resetTimer = null;
 
 screen.addEventListener("click", function(event) {
 
-    /* Ignore clicks on the reset button */
+    /* If caregiver clicked RESET, don't trigger CALL */
     if (event.target === reset) {
         return;
     }
 
-    /* Ignore everything while already calling */
+    /* Don't allow another call while already calling */
     if (screen.classList.contains("calling")) {
         return;
     }
 
+    /* Change screen */
+
     screen.classList.add("calling");
     label.textContent = "CALLING";
 
+
+    /* Start the Apple Shortcut */
+
     window.location.href =
         "shortcuts://run-shortcut?name=CALL%20ALARM";
+
 });
 
 
@@ -138,67 +151,19 @@ screen.addEventListener("click", function(event) {
    CAREGIVER RESET
    ========================= */
 
-function beginReset(event) {
+reset.addEventListener("click", function(event) {
 
-    event.preventDefault();
+    /* Prevent this click from reaching the CALL screen */
+
     event.stopPropagation();
 
-    /* Only allow reset while CALLING */
-    if (!screen.classList.contains("calling")) {
-        return;
-    }
 
-    /* Cancel any previous reset timer */
-    if (resetTimer !== null) {
-        clearTimeout(resetTimer);
-        resetTimer = null;
-    }
+    /* Return to normal CALL state */
 
-    /* Must hold for 2 seconds */
-    resetTimer = setTimeout(function() {
+    screen.classList.remove("calling");
+    label.textContent = "CALL";
 
-        screen.classList.remove("calling");
-        label.textContent = "CALL";
-
-        resetTimer = null;
-
-    }, 2000);
-}
-
-
-function cancelReset(event) {
-
-    if (event) {
-        event.preventDefault();
-        event.stopPropagation();
-    }
-
-    if (resetTimer !== null) {
-        clearTimeout(resetTimer);
-        resetTimer = null;
-    }
-}
-
-
-/* Trackpad / mouse */
-
-reset.addEventListener("mousedown", beginReset);
-reset.addEventListener("mouseup", cancelReset);
-reset.addEventListener("mouseleave", cancelReset);
-
-
-/* Touchscreen */
-
-reset.addEventListener("touchstart", beginReset, { passive: false });
-reset.addEventListener("touchend", cancelReset, { passive: false });
-reset.addEventListener("touchcancel", cancelReset, { passive: false });
-
-
-/* Pointer events as an additional fallback */
-
-reset.addEventListener("pointerdown", beginReset);
-reset.addEventListener("pointerup", cancelReset);
-reset.addEventListener("pointercancel", cancelReset);
+});
 
 </script>
 
