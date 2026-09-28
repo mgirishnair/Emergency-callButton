@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+
 <meta name="viewport"
       content="width=device-width,
                initial-scale=1,
@@ -18,15 +19,18 @@ html, body {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    background: #c62828;
-    touch-action: manipulation;
+
+    background: #080808;
+
     user-select: none;
     -webkit-user-select: none;
+    touch-action: manipulation;
 }
 
-#call {
+#screen {
     position: fixed;
     inset: 0;
+
     width: 100vw;
     height: 100vh;
 
@@ -34,49 +38,134 @@ html, body {
     align-items: center;
     justify-content: center;
 
-    background: #c62828;
-    color: white;
+    background: #080808;
+    color: #777;
 
-    font-family: -apple-system, BlinkMacSystemFont,
-                 "Helvetica Neue", Arial, sans-serif;
-
-    font-size: 18vw;
-    font-weight: 800;
-    letter-spacing: 0.02em;
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Helvetica Neue",
+        Arial,
+        sans-serif;
 
     cursor: pointer;
 }
 
-#message {
+/* Normal standby screen */
+
+#label {
+    font-size: 18vw;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+
+/* CALLING state */
+
+#screen.calling {
+    background: #160a0a;
+    color: #c98b8b;
+}
+
+
+/* Caregiver reset button */
+
+#reset {
+    display: none;
+
     position: absolute;
     bottom: 5vh;
-    width: 100%;
-    text-align: center;
+    left: 50%;
 
-    font-size: 5vw;
+    transform: translateX(-50%);
+
+    padding: 16px 34px;
+
+    border: 2px solid #765050;
+    border-radius: 18px;
+
+    background: #211010;
+    color: #b98f8f;
+
+    font-size: 4vw;
     font-weight: 600;
 }
+
+#screen.calling #reset {
+    display: block;
+}
+
 </style>
 </head>
 
 <body>
 
-<div id="call">
-    CALL
-    <div id="message"></div>
+<div id="screen">
+
+    <div id="label">CALL</div>
+
+    <button id="reset" type="button">
+        HOLD TO RESET
+    </button>
+
 </div>
 
 <script>
-const callButton = document.getElementById("call");
 
-callButton.addEventListener("click", function () {
-    document.getElementById("message").textContent =
-        "CALLING…";
+const screen = document.getElementById("screen");
+const label = document.getElementById("label");
+const reset = document.getElementById("reset");
 
-    // Temporary test.
-    // We'll connect the real alarm later.
-    navigator.vibrate?.([300, 150, 300]);
+let resetTimer = null;
+
+
+/* Dad activates CALL */
+
+screen.addEventListener("click", function(event) {
+
+    if (event.target === reset) {
+        return;
+    }
+
+    if (screen.classList.contains("calling")) {
+        return;
+    }
+
+    screen.classList.add("calling");
+    label.textContent = "CALLING";
+
+    window.location.href =
+        "shortcuts://run-shortcut?name=CALL%20ALARM";
 });
+
+
+/* Caregiver holds RESET for 2 seconds */
+
+function startReset() {
+
+    resetTimer = setTimeout(function() {
+
+        screen.classList.remove("calling");
+        label.textContent = "CALL";
+
+    }, 2000);
+}
+
+
+function cancelReset() {
+
+    if (resetTimer !== null) {
+        clearTimeout(resetTimer);
+        resetTimer = null;
+    }
+}
+
+
+reset.addEventListener("pointerdown", startReset);
+reset.addEventListener("pointerup", cancelReset);
+reset.addEventListener("pointercancel", cancelReset);
+reset.addEventListener("pointerleave", cancelReset);
+
 </script>
 
 </body>
