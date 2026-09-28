@@ -14,31 +14,45 @@
 <title>CALL</title>
 
 <style>
+
 html, body {
     margin: 0;
     padding: 0;
+
     width: 100%;
     height: 100%;
+
     overflow: hidden;
+
     background: #080808;
 
     user-select: none;
     -webkit-user-select: none;
+
     touch-action: manipulation;
 }
 
-#screen {
-    position: fixed;
-    inset: 0;
 
-    width: 100vw;
-    height: 100vh;
+/* =========================
+   MAIN CALL AREA
+   ========================= */
+
+#callArea {
+
+    position: fixed;
+
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
 
     display: flex;
+
     align-items: center;
     justify-content: center;
 
     background: #080808;
+
     color: #777;
 
     font-family:
@@ -51,95 +65,140 @@ html, body {
     cursor: pointer;
 }
 
+
 #label {
+
     font-size: 18vw;
+
     font-weight: 700;
+
     letter-spacing: 0.02em;
+
 }
 
 
-/* CALLING screen */
+/* =========================
+   CALLING STATE
+   ========================= */
 
-#screen.calling {
+body.calling #callArea {
+
     background: #160a0a;
+
     color: #c98b8b;
+
 }
 
 
-/* Caregiver RESET button */
+/* =========================
+   RESET BUTTON
+   ========================= */
 
 #reset {
+
     display: none;
 
-    position: absolute;
-    bottom: 5vh;
+    position: fixed;
+
     left: 50%;
+
+    bottom: 5vh;
+
     transform: translateX(-50%);
 
-    padding: 18px 40px;
+    padding: 18px 45px;
 
     border: 2px solid #765050;
+
     border-radius: 18px;
 
     background: #211010;
+
     color: #c9a0a0;
 
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Helvetica Neue",
+        Arial,
+        sans-serif;
+
     font-size: 4vw;
+
     font-weight: 600;
 
     cursor: pointer;
+
+    z-index: 10;
+
 }
 
-#screen.calling #reset {
+
+/* Only show RESET while calling */
+
+body.calling #reset {
+
     display: block;
+
 }
 
 </style>
 </head>
 
+
 <body>
 
-<div id="screen">
+
+<!-- =========================
+     CALL AREA
+     ========================= -->
+
+<div id="callArea">
 
     <div id="label">CALL</div>
-
-    <button id="reset" type="button">
-        RESET
-    </button>
 
 </div>
 
 
+<!-- =========================
+     CAREGIVER RESET
+     ========================= -->
+
+<button id="reset" type="button">
+    RESET
+</button>
+
+
 <script>
 
-const screen = document.getElementById("screen");
-const label = document.getElementById("label");
+const callArea = document.getElementById("callArea");
+
 const reset = document.getElementById("reset");
+
+const label = document.getElementById("label");
 
 
 /* =========================
-   DAD ACTIVATES CALL
+   DAD PRESSES CALL
    ========================= */
 
-screen.addEventListener("click", function(event) {
+callArea.addEventListener("click", function() {
 
-    /* If caregiver clicked RESET, don't trigger CALL */
-    if (event.target === reset) {
+    /* Ignore if already calling */
+
+    if (document.body.classList.contains("calling")) {
         return;
     }
 
-    /* Don't allow another call while already calling */
-    if (screen.classList.contains("calling")) {
-        return;
-    }
 
-    /* Change screen */
+    /* Change the screen */
 
-    screen.classList.add("calling");
+    document.body.classList.add("calling");
+
     label.textContent = "CALLING";
 
 
-    /* Start the Apple Shortcut */
+    /* Start Apple Shortcut */
 
     window.location.href =
         "shortcuts://run-shortcut?name=CALL%20ALARM";
@@ -148,22 +207,27 @@ screen.addEventListener("click", function(event) {
 
 
 /* =========================
-   CAREGIVER RESET
+   CAREGIVER PRESSES RESET
    ========================= */
 
 reset.addEventListener("click", function(event) {
 
-    /* Prevent this click from reaching the CALL screen */
+    /*
+       Stop this click from going anywhere else.
+       It cannot activate CALL.
+    */
 
     event.stopPropagation();
 
 
-    /* Return to normal CALL state */
+    /* Return to CALL state */
 
-    screen.classList.remove("calling");
+    document.body.classList.remove("calling");
+
     label.textContent = "CALL";
 
 });
+
 
 </script>
 
