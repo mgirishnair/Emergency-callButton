@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width,
+               initial-scale=1,
+               maximum-scale=1,
+               user-scalable=no,
+               viewport-fit=cover">
+
+<title>CALL</title>
+
+<style>
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #c62828;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+#call {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #c62828;
+    color: white;
+
+    font-family: -apple-system, BlinkMacSystemFont,
+                 "Helvetica Neue", Arial, sans-serif;
+
+    font-size: 18vw;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+
+    cursor: pointer;
+}
+
+#message {
+    position: absolute;
+    bottom: 5vh;
+    width: 100%;
+    text-align: center;
+
+    font-size: 5vw;
+    font-weight: 600;
+}
+</style>
+</head>
+
+<body>
+
+<div id="call">
+    CALL
+    <div id="message"></div>
+</div>
+
+<script>
+const callButton = document.getElementById("call");
+
+callButton.addEventListener("click", function () {
+    document.getElementById("message").textContent =
+        "CALLING…";
+
+    // Temporary test.
+    // We'll connect the real alarm later.
+    navigator.vibrate?.([300, 150, 300]);
+});
+</script>
+
+</body>
+</html>
